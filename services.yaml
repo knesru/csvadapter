@@ -1,0 +1,8 @@
+services:
+    # Автоматическое подключение интерфейса к реализации
+    App\Service\Interfaces\CsvSenderInterface: '@App\Service\ApiCsvSender'
+
+    # Сервис с аргументами
+    App\Service\ApiCsvSender:
+        arguments:
+            $apiUrl: '%env(API_CSV_ENDPOINT)%'  # URL из .env
