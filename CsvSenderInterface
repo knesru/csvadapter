@@ -1,0 +1,4 @@
+interface CsvSenderInterface
+{
+    public function sendCSV(string $filePath, array $metadata = []): bool;
+}
