@@ -101,3 +101,27 @@ final class Version20240320000000 extends AbstractMigration
         $this->addSql('DROP TABLE applications');
     }
 } 
+===
+        "symfony/dotenv": "7.2.*",
+        "symfony/flex": "^2",
+        "symfony/framework-bundle": "7.2.*",
+        "symfony/runtime": "7.2.*",
+        "symfony/yaml": "7.2.*",
+        "php-amqplib/php-amqplib": "^3.6",
+        "doctrine/orm": "^2.17",
+        "symfony/http-client": "7.2.*",
+        "symfony/monolog-bundle": "^3.10"
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.52",
+        "symfony/phpunit-bridge": "^7.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "symfony/flex": true,
+            "symfony/runtime": true
+        },
+        "bump-after-update": true,
+        "sort-packages": true
+    },
