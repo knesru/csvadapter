@@ -538,3 +538,101 @@ interface AxilinkApiPort
      */
     public function sendData(array $data): array;
 }
+<?php
+
+declare(strict_types=1);
+
+namespace App\Integration\AxiLink;
+
+class DataTransformerService
+{
+    public function convertToEcofinXml(array $data): string
+    {
+        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Application></Application>');
+
+        // application
+        if (isset($data['application'])) {
+            $app = $data['application'];
+            $xml->addChild('applicationId', (string)($app['applicationId'] ?? ''));
+            $xml->addChild('amount', (string)($app['amount'] ?? ''));
+            $xml->addChild('term', (string)($app['term'] ?? ''));
+            $xml->addChild('firstApplicationDate', (string)($app['firstApplicationDate'] ?? ''));
+            $xml->addChild('currentApplicationDate', (string)($app['currentApplicationDate'] ?? ''));
+            $xml->addChild('personalDataUsageConsent', $app['personalDataUsageConsent'] ? 'true' : 'false');
+            $xml->addChild('amountOriginal', (string)($app['amountOriginal'] ?? ''));
+            $xml->addChild('insuranceConsentStatus', $app['insuranceConsentStatus'] ? 'true' : 'false');
+        }
+
+        // client -> applicant
+        if (isset($data['client'])) {
+            $client = $data['client'];
+            $applicant = $xml->addChild('applicant');
+            $applicant->addChild('firstName', $client['firstName'] ?? '');
+            $applicant->addChild('lastName', $client['lastName'] ?? '');
+            $applicant->addChild('middleName', $client['middleName'] ?? '');
+            $applicant->addChild('sex', $client['sex'] ?? '');
+            $applicant->addChild('dob', $client['dob'] ?? '');
+            $applicant->addChild('mobilePhone', $client['mobilePhone'] ?? '');
+            $applicant->addChild('email', $client['email'] ?? '');
+            // паспорт
+            if (isset($client['passport'])) {
+                $passport = $applicant->addChild('passport');
+                $passport->addChild('passportSerial', $client['passport']['passportSerial'] ?? '');
+                $passport->addChild('passportNumber', $client['passport']['passportNumber'] ?? '');
+                $passport->addChild('issuedDate', $client['passport']['issuedDate'] ?? '');
+                $passport->addChild('divisionCode', $client['passport']['divisionCode'] ?? '');
+                $passport->addChild('issuedBy', $client['passport']['issuedBy'] ?? '');
+                $passport->addChild('expireDate', $client['passport']['expireDate'] ?? '');
+            }
+            // адреса
+            if (isset($client['actualAddress'])) {
+                $address = $applicant->addChild('actualAddress');
+                $address->addChild('city', $client['actualAddress']['city'] ?? '');
+                $address->addChild('house', $client['actualAddress']['house'] ?? '');
+                $address->addChild('zip', $client['actualAddress']['zip'] ?? '');
+                $address->addChild('apartment', $client['actualAddress']['apartment'] ?? '');
+                $address->addChild('street', $client['actualAddress']['street'] ?? '');
+            }
+            if (isset($client['declaredAddress'])) {
+                $address = $applicant->addChild('declaredAddress');
+                $address->addChild('city', $client['declaredAddress']['city'] ?? '');
+                $address->addChild('house', $client['declaredAddress']['house'] ?? '');
+                $address->addChild('zip', $client['declaredAddress']['zip'] ?? '');
+                $address->addChild('apartment', $client['declaredAddress']['apartment'] ?? '');
+                $address->addChild('street', $client['declaredAddress']['street'] ?? '');
+            }
+        }
+
+        // loanHistory
+        if (isset($data['loanHistory'])) {
+            $loanHistory = $xml->addChild('loanHistory');
+            $lh = $data['loanHistory'];
+            $loanHistory->addChild('issuedLoansReg', (string)($lh['issuedLoansReg'] ?? ''));
+            $loanHistory->addChild('maxDpd', (string)($lh['maxDpd'] ?? ''));
+            $loanHistory->addChild('daysPrevLoan', (string)($lh['daysPrevLoan'] ?? ''));
+            $loanHistory->addChild('sumAllLoans', (string)($lh['sumAllLoans'] ?? ''));
+            $loanHistory->addChild('lastLoanAmountOriginal', (string)($lh['lastLoanAmountOriginal'] ?? ''));
+        }
+
+        // riskAssessment
+        if (isset($data['riskAssessment'])) {
+            $risk = $xml->addChild('riskAssessment');
+            $risk->addChild('clientInBlacklist', $data['riskAssessment']['clientInBlacklist'] ? 'true' : 'false');
+        }
+
+        // fraudDetection
+        if (isset($data['fraudDetection'])) {
+            $fraud = $xml->addChild('fraudDetection');
+            $fraud->addChild('proxyUsed', $data['fraudDetection']['proxyUsed'] ? 'true' : 'false');
+            $fraud->addChild('ipAddress', $data['fraudDetection']['ipAddress'] ?? '');
+        }
+
+        // crossProducts
+        if (isset($data['crossProducts'])) {
+            $cross = $xml->addChild('crossProducts');
+            $cross->addChild('totalProductsSold', (string)($data['crossProducts']['totalProductsSold'] ?? ''));
+        }
+
+        return $xml->asXML();
+    }
+} 
